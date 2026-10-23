@@ -1,0 +1,50 @@
+const movies = [
+  // Добавляй сюда свои видео из VK Видео.
+  // Пример:
+  // {id:1,title:"Название видео",year:2026,genre:"Драма",type:"Фильм",rating:0,duration:"",description:"Описание",poster:"https://ссылка-на-постер.jpg",videoUrl:"https://vkvideo.ru/video_ext.php?oid=-123456&id=456789&hash=ВАШ_HASH"}
+];
+const $ = id => document.getElementById(id);
+let activeGenre="Все", onlySaved=false, sortHigh=true, query="", toastTimer;
+let saved = new Set(JSON.parse(localStorage.getItem("moviraq-watchlist") || "[]"));
+const grid=$("movieGrid"), dialog=$("movieDialog"), playerDialog=$("playerDialog");
+function saveList(){localStorage.setItem("moviraq-watchlist",JSON.stringify([...saved]));$("watchCount").textContent=saved.size;$("heroSave").classList.toggle("saved",saved.has(1));$("heroSave").textContent=saved.has(1)?"♥":"♡";}
+function notify(text){const t=$("toast");t.textContent=text;t.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove("show"),2200)}
+function toggleSave(id){if(saved.has(id)){saved.delete(id);notify("Удалено из моего списка")}else{saved.add(id);notify("Добавлено в мой список")}saveList();render()}
+function render(){let list=movies.filter(m=>(activeGenre==="Все"||m.genre===activeGenre)&&(!onlySaved||saved.has(m.id))&&(!query||(m.title+" "+m.genre+" "+m.year+" "+m.type).toLowerCase().includes(query.toLowerCase())));list.sort((a,b)=>sortHigh?b.rating-a.rating:a.rating-b.rating);grid.innerHTML=list.map(m=>`<article class="movie-card" data-open="${m.id}" tabindex="0" aria-label="Подробнее: ${m.title}"><div class="poster-wrap"><img class="poster" src="${m.poster}" alt="Постер: ${m.title}" loading="lazy"><span class="poster-badge ${m.badge==='ПРЕМЬЕРА'||m.badge==='НОВИНКА'?'new':''}">${m.badge||m.type.toUpperCase()}</span><button class="card-save ${saved.has(m.id)?'saved':''}" data-save="${m.id}" aria-label="${saved.has(m.id)?'Удалить из':'Добавить в'} мой список">${saved.has(m.id)?'♥':'♡'}</button><div class="poster-overlay"><span class="play-circle">▶</span></div></div><div class="movie-title-row"><span class="movie-title">${m.title}</span><span class="movie-rating">★ ${m.rating.toFixed(1)}</span></div><div class="movie-subtitle"><span>${m.year}</span><span class="tiny-dot"></span><span>${m.genre}</span></div></article>`).join("");$("resultsCount").textContent=`${list.length} ${wordMovies(list.length)}`;$("emptyState").hidden=list.length>0;grid.hidden=list.length===0;$("resultsLabel").textContent=onlySaved?"Твой список":"Подобрано для тебя";$("watchlistToggle").classList.toggle("active",onlySaved)}
+function wordMovies(n){return n===1?"фильм":n>1&&n<5?"фильма":"фильмов"}
+function getEmbedUrl(value){
+  if(!value)return "";
+  const raw=String(value).trim();
+  const match=raw.match(/src\s*=\s*["']([^"']+)["']/i);
+  let url=match?match[1]:raw;
+  if(url.startsWith("//"))url="https:"+url;
+  try{
+    const u=new URL(url);
+    if(!/(^|\.)((vkvideo\.ru)|(vk\.com)|(vk\.ru))$/i.test(u.hostname))return "";
+    if(!u.pathname.includes("video_ext.php"))return "";
+    return u.href;
+  }catch(e){return ""}
+}
+function openEmbeddedPlayer(m){
+  const src=getEmbedUrl(m.videoUrl);
+  if(!src){notify("Нужна ссылка video_ext.php из кода встраивания VK Видео");return}
+  $("dialogContent").innerHTML=`<div class="dialog-body embedded-player-body"><div class="dialog-tags"><span style="color:var(--accent)">MOVIRAQ PLAYER</span><span>${m.year||""}</span><span>${m.genre||""}</span></div><h2>${m.title}</h2><div class="embedded-player"><iframe src="${src.replace(/&/g,"&amp;")}" title="${String(m.title).replace(/["<>]/g,"")}" allow="autoplay; encrypted-media; fullscreen; picture-in-picture; screen-wake-lock" frameborder="0" allowfullscreen loading="lazy"></iframe></div><p>${m.description||""}</p></div>`;
+  dialog.showModal();
+}
+function openMovie(id){const m=movies.find(x=>x.id===id);if(!m)return;$("dialogContent").innerHTML=`<div class="dialog-poster" style="background-image:url('${m.poster}')"></div><div class="dialog-body"><div class="dialog-tags"><span style="color:var(--accent)">★ ${m.rating.toFixed(1)}</span><span>${m.year}</span><span>${m.genre}</span><span>${m.duration}</span></div><h2>${m.title}</h2><p>${m.description}</p><div class="hero-actions"><button class="primary-btn" id="dialogPlay">▶ Подробнее о фильме</button><button class="secondary-btn" id="dialogSave">${saved.has(id)?"♥ В моём списке":"♡ В мой список"}</button></div></div>`;dialog.showModal();$("dialogPlay").textContent="▶ Смотреть видео";$("dialogPlay").onclick=()=>{if(m.videoUrl){dialog.close();openEmbeddedPlayer(m)}else{dialog.close();notify("Добавь ссылку video_ext.php из кода встраивания VK Видео в script.js")}};$("dialogSave").onclick=()=>{toggleSave(id);$("dialogSave").textContent=saved.has(id)?"♥ В моём списке":"♡ В мой список"}}
+function openPlayer(){playerDialog.showModal()}
+grid.addEventListener("click",e=>{const save=e.target.closest("[data-save]");if(save){e.stopPropagation();toggleSave(Number(save.dataset.save));return}const card=e.target.closest("[data-open]");if(card)openMovie(Number(card.dataset.open))});
+grid.addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.target.matches("[data-open]")){e.preventDefault();openMovie(Number(e.target.dataset.open))}});
+$("genreFilters").addEventListener("click",e=>{const b=e.target.closest("[data-genre]");if(!b)return;activeGenre=b.dataset.genre;document.querySelectorAll(".chip").forEach(c=>c.classList.toggle("active",c===b));render()});
+$("searchInput").addEventListener("input",e=>{query=e.target.value.trim();render()});
+$("watchlistToggle").onclick=()=>{onlySaved=!onlySaved;$("watchlistToggle").innerHTML=onlySaved?'♥<span class="watch-count" id="watchCount">'+saved.size+'</span>':'♡<span class="watch-count" id="watchCount">'+saved.size+'</span>';render();$("catalog").scrollIntoView({behavior:"smooth"})};
+$("sortButton").onclick=()=>{sortHigh=!sortHigh;$("sortButton").innerHTML=(sortHigh?"★ Сначала рейтинг":"★ Сначала ниже рейтинг")+' <span>⌄</span>';render()};
+$("showAll").onclick=()=>{activeGenre="Все";onlySaved=false;query="";$("searchInput").value="";document.querySelectorAll(".chip").forEach(c=>c.classList.toggle("active",c.dataset.genre==="Все"));render()};
+$("resetFilters").onclick=()=>{$("showAll").click()};
+$("heroPlay").onclick=()=>openMovie(1);$("heroInfo").onclick=()=>notify("Добавь свои видео в каталог через script.js");$("heroSave").onclick=()=>notify("Добавь видео в каталог, чтобы сохранить его");
+$("dialogClose").onclick=()=>dialog.close();$("playerClose").onclick=()=>playerDialog.close();
+$("profileButton").onclick=()=>notify("MOVIRAQ — демо-профиль. Регистрация не требуется.");
+$("aboutLink").onclick=e=>{e.preventDefault();dialog.showModal();$("dialogContent").innerHTML='<div class="about-copy"><h2>О MOVIRAQ</h2><p>MOVIRAQ — концепт онлайн-кинотеатра с подборкой историй на любой вечер. Сохраняй фильмы, исследуй жанры и находи то, что хочется посмотреть.</p><p>Это статический демо-сайт. Для настоящего просмотра добавляй легальные ссылки на трейлеры или видео, которыми ты владеешь.</p></div>'};
+document.querySelectorAll("[data-filter-link]").forEach(a=>a.onclick=()=>{activeGenre="Все";onlySaved=false;render()});
+document.addEventListener("keydown",e=>{if(e.key==="/"&&!["INPUT","TEXTAREA"].includes(document.activeElement.tagName)){e.preventDefault();$("searchInput").focus()}if(e.key==="Escape"){dialog.close();playerDialog.close()}});
+saveList();render();
