@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090b12">
+  <meta name="description" content="MOVIRAQ — твоя территория кино. Находи фильмы, сохраняй избранное и открывай новые истории.">
+  <title>MOVIRAQ — территория кино</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="MOVIRAQ — главная"><span class="brand-mark">M</span><span>MOVI<span class="brand-accent">RAQ</span></span></a>
+    <nav class="main-nav" aria-label="Основная навигация">
+      <a class="nav-link active" href="#home">Главная</a><a class="nav-link" href="#catalog">Фильмы</a><a class="nav-link" href="#catalog" data-filter-link="series">Сериалы</a>
+    </nav>
+    <div class="header-actions">
+      <label class="search-box"><span class="search-icon">⌕</span><input id="searchInput" type="search" placeholder="Название, жанр..." aria-label="Поиск фильмов"><kbd>/</kbd></label>
+      <button class="icon-btn watchlist-top" id="watchlistToggle" aria-label="Мой список" title="Мой список">♡<span class="watch-count" id="watchCount">0</span></button>
+      <button class="avatar" id="profileButton" aria-label="Профиль">М</button>
+    </div>
+  </header>
+
+  <main id="home">
+    <section class="hero" aria-label="Рекомендуемый фильм">
+      <div class="hero-image"></div><div class="hero-shade"></div>
+      <div class="hero-content">
+        <div class="eyebrow"><span class="eyebrow-dot"></span> ВЫБОР РЕДАКЦИИ <span class="eyebrow-line"></span> ПРЕМЬЕРА НЕДЕЛИ</div>
+        <div class="hero-title-row"><h1>За гранью<br><span>тишины</span></h1><span class="hero-index">01 <i>/ 04</i></span></div>
+        <p class="hero-description">Когда сигналы из далёкого космоса нарушают привычный порядок, одна исследовательница отправляется навстречу тайне, способной изменить представление о человечестве.</p>
+        <div class="hero-meta"><span class="rating">★ 8.7</span><span>2025</span><span class="meta-divider"></span><span>Фантастика</span><span>2 ч 08 мин</span><span class="age">16+</span></div>
+        <div class="hero-actions"><button class="primary-btn" id="heroPlay"><span>▶</span> Смотреть трейлер</button><button class="secondary-btn" id="heroInfo">ⓘ &nbsp; Подробнее</button><button class="round-btn" id="heroSave" aria-label="Добавить в мой список">♡</button></div>
+      </div>
+      <div class="hero-bottom"><div class="hero-dots"><span class="dot selected"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div><span class="scroll-note">ИСТОРИИ, КОТОРЫЕ ОСТАЮТСЯ С ТОБОЙ <span>↓</span></span></div>
+    </section>
+
+    <section class="catalog-section" id="catalog">
+      <div class="section-heading"><div><p class="section-kicker">ТВОЙ СЛЕДУЮЩИЙ ФАВОРИТ</p><h2>Открывай новое<span class="accent-period">.</span></h2></div><a href="#movieGrid" class="all-link" id="showAll">Весь каталог <span>↗</span></a></div>
+      <div class="toolbar"><div class="filter-chips" id="genreFilters"><button class="chip active" data-genre="Все">Все</button><button class="chip" data-genre="Драма">Драма</button><button class="chip" data-genre="Фантастика">Фантастика</button><button class="chip" data-genre="Триллер">Триллер</button><button class="chip" data-genre="Комедия">Комедия</button><button class="chip" data-genre="Приключения">Приключения</button></div><button class="sort-btn" id="sortButton">★ Сначала рейтинг <span>⌄</span></button></div>
+      <div class="results-line"><span id="resultsLabel">Подобрано для тебя</span><span class="results-count" id="resultsCount"></span></div>
+      <div class="movie-grid" id="movieGrid" aria-live="polite"></div>
+      <div class="empty-state" id="emptyState" hidden><span>⌕</span><h3>Ничего не найдено</h3><p>Попробуй изменить запрос или выбрать другой жанр.</p><button class="secondary-btn" id="resetFilters">Сбросить фильтры</button></div>
+    </section>
+    <section class="quote-band"><span class="quote-mark">“</span><div><p>У каждого фильма есть момент, ради которого стоит досмотреть до конца.</p><span>MOVIRAQ · ТВОЯ ТЕРРИТОРИЯ КИНО</span></div><div class="quote-art">M<span>Q</span></div></section>
+  </main>
+
+  <footer><a class="brand footer-brand" href="#"><span class="brand-mark">M</span><span>MOVI<span class="brand-accent">RAQ</span></span></a><span>© 2026 MOVIRAQ. Создано для любителей историй.</span><div class="footer-links"><a href="#catalog">Каталог</a><a href="#" id="aboutLink">О проекте</a></div></footer>
+  <div class="toast" id="toast" role="status"></div>
+
+  <dialog id="movieDialog" class="movie-dialog"><button class="dialog-close" id="dialogClose" aria-label="Закрыть">×</button><div id="dialogContent"></div></dialog>
+  <dialog id="playerDialog" class="player-dialog"><button class="dialog-close" id="playerClose" aria-label="Закрыть">×</button><div class="player-frame"><div class="player-symbol">▶</div><p>Трейлер скоро здесь</p><span>Добавь ссылку на официальный трейлер в script.js</span></div></dialog>
+  <script src="script.js"></script>
+</body>
+</html>
