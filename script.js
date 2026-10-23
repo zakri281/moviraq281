@@ -3,6 +3,18 @@ const movies = [
   // Пример:
   // {id:1,title:"Название видео",year:2026,genre:"Драма",type:"Фильм",rating:0,duration:"",description:"Описание",poster:"https://ссылка-на-постер.jpg",videoUrl:"https://vkvideo.ru/video_ext.php?oid=-123456&id=456789&hash=ВАШ_HASH"}
 ];
+{
+  id: 1,
+  title: "Вышка 2",
+  year: 2026,
+  genre: "Драма",
+  type: "Фильм",
+  rating: 8.5,
+  duration: "1 ч 40 мин",
+  description: "Описание фильма",
+  poster: "https://example.com/poster.jpg",
+  videoUrl: "https://vkvideo.ru/video_ext.php?oid=-231787809&id=456239199&hash=83296744bbc2554d&hd=2"
+}
 const $ = id => document.getElementById(id);
 let activeGenre="Все", onlySaved=false, sortHigh=true, query="", toastTimer;
 let saved = new Set(JSON.parse(localStorage.getItem("moviraq-watchlist") || "[]"));
